@@ -2,12 +2,16 @@
 """
 Created on Sun Jun 14 19:48:52 2020
 
+Inspired by https://geekswipe.net/technology/computing/analyze-chromes-browsing-history-with-python/
+
 @author: Mircea Davidescu
 """
 import os
 import sqlite3
 import pandas as pd
 import numpy as np
+from collections import OrderedDict
+import matplotlib.pyplot as plt
 
 
 # Identify history file location for Brave
@@ -34,14 +38,18 @@ visitsInfo = cursor.fetchall()
 
 
 
-select_statement = "SELECT urls.url, urls.visit_count FROM urls WHERE urls.id = visits.url;"
+select_statement = "SELECT urls.url, urls.visit_count FROM urls, visits WHERE urls.id = visits.url;"
 cursor.execute(select_statement)
 results = cursor.fetchall()
 
 
+url,visits = map(list,zip(*results))
 
-results_dict = {'URL': results}
+
+results_dict = {'URL': url, 'Visits': visits}
 myURLS = pd.DataFrame(data = results_dict)
+
+myURLS.to_csv('myFile.csv')
 
 
 def parse(url):
@@ -63,3 +71,6 @@ for url, count in results:
 		sites_count[url] += 1
 	else:
 		sites_count[url] = 1
+        
+plt.bar(myURLS['URL'], myURLS['Visits'])
+plt.show()
